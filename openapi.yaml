@@ -1,0 +1,426 @@
+openapi: 3.0.2
+info:
+  title: ふぁすま API
+  description: |-
+    <b>Fintech サーバサイド API仕様</b>
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+tags:
+  - name: user
+    description: ユーザ関連API
+  - name: skill
+    description: スキル関連API
+  - name: search
+    description: 検索関連API
+  - name: notice
+    description: お知らせ関連API
+
+paths:
+  /user:
+    get:
+      tags:
+        - user
+      summary: ユーザ情報取得API
+      description: |-
+        ユーザの詳細情報を取得
+      security:
+        - ApiToken: []
+      parameters:
+        - in: query
+          name: studentID
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/user/{user_id}':
+    put:
+      tags:
+        - user
+      summary: ユーザ情報更新API
+      description: |-
+        ユーザ情報の更新をします。
+        初期実装では名前の更新を行います。
+      security:
+        - ApiToken: []
+      parameters:
+        - $ref: '#/components/parameters/UserID'
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /users:
+    get:
+      tags:
+        - user
+      summary: ユーザ情報一覧取得API
+      description: |-
+        ユーザの詳細情報を取得
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAllGetResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/users/new':
+    get:
+      tags:
+        - user
+      summary: ユーザ情報一覧取得API(10個ずつ)
+      description: |-
+        ユーザの詳細情報を取得
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAllGetResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /skills:
+    post:
+      tags:
+        - skill
+      summary: スキル投稿API
+      description: |-
+        スキル名・サムネイル・説明文・価格・カテゴリ・タグをパラメーターにして、スキルのid・スキル名・サムネイル・説明文・価格・カテゴリ・タグ・作成時間・更新時間を返却する。
+        <br><br>
+        タグは同じタグ名がなければ登録して、あれば登録しない。<br>
+        中間テーブルでスキルとタグを関連付ける。<br>
+        中間テーブルでスキルとカテゴリを関連付ける。<br>
+        取引情報も登録する。
+      security:
+        - ApiToken: []    
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - skill
+      summary: スキル情報更新API
+      description: |-
+        ユーザが出品したスキルである場合のみ、スキルidをパラメーターにしてスキルを編集して、スキルid・スキル名・サムネイル・説明文・価格・カテゴリ・タグ・作成時間・更新時間を返却する。
+      security:
+        - ApiToken: []
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              
+  /skills/new:
+    get:
+      tags:
+        - skill
+      summary: スキル情報一覧取得API（10個ずつ）
+      description: |-
+        新規投稿順でスキルの取得を10個ずつ行う。limitで取得件数を指定（デフォルトは10）し、offsetで何件目から取得するかを指定（デフォルト値は0）する。各スキルのスキルid・スキル名・サムネイル・説明文・価格・作成時間・更新時間を取得して返却する。
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillListResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'  
+components:
+  schemas:
+    UserGetResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id
+          example: 1
+        name:
+          type: string
+          description: 名前
+          example: Tanaka
+        avatar:
+          type: string
+          description: アップロードする画像
+          example: feja4e4w3njn35k3nk3h3kjn3fku4
+        introduction: 
+          type: string
+          description: 自己紹介文
+          example: はじめまして
+        google_emial:
+          type: string
+          description: メールアドレス
+          example: tanaka@gmail.com
+        school_email:
+          type: string
+          description: 大学メールアドレス
+          example: tanaka@fun.ac.jp
+        other_email:
+          type: string
+          description: サブメールアドレス
+          example: tanaka@ezweb.ne.jp        
+        qr_code:
+          type: string
+          description: qrコード
+          example: w3njn35k3nk3h3kjn3fku4cewr
+        created_at:
+          type: string
+          description: 作成した時間
+          example: 2020-05-10/04:45:50
+        updated_at:
+          type: string
+          description: 更新した時間
+          example: 2020-05-10/04:45:50
+    UserAllGetResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserGetResponse'
+    UserUpdateRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id
+          example: 1
+        name:
+          type: string
+          description: ユーザー名
+          example: Tanaka
+        avatar:
+          type: string
+          description: アップロードする画像
+          example: feja4e4w3njn35k3nk3h3kjn3fku4
+        introduction: 
+          type: string
+          description: 自己紹介文
+          example: はじめまして
+        google_emial:
+          type: string
+          description: メールアドレス
+          example: tanaka@gmail.com
+        school_email:
+          type: string
+          description: 大学メールアドレス
+          example: tanaka@fun.ac.jp
+        other_email:
+          type: string
+          description: サブメールアドレス
+          example: tanaka@ezweb.ne.jp        
+        qr_code:
+          type: string
+          description: qrコード
+          example: w3njn35k3nk3h3kjn3fku4cewr
+    SkillRequest:
+       type: object
+       properties:
+        id:
+          type: integer
+          description: id
+          example: 1
+        name:
+          type: string
+          description: スキル名
+          example: c言語
+        thumbnail:
+          type: string
+          description: 画像
+          example: ljkfalkjflkjaflsekjfldjlkj
+        description:
+          type: string
+          description: スキル概要
+          example: 課題なら教えられます。
+        price: 
+          type: integer
+          description: 料金
+          example: 2000
+        category:
+          type: string
+          description: カテゴリ
+          example: プログラミング
+        tag:
+          type: string
+          description: タグ
+          example: c
+    SkillListResponse:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillResponse'
+    SkillResponse:
+        type: object
+        properties: 
+         id:
+          type: integer
+          description: id
+          example: 1
+         name:
+          type: string
+          description: スキル名
+          example: c言語
+         thumbnail:
+          type: string
+          description: 画像
+          example: ljkfalkjflkjaflsekjfldjlkj
+         description:
+          type: string
+          description: スキル概要
+          example: 課題なら教えられます。
+         price: 
+          type: integer
+          description: 料金
+          example: 2000
+         category:
+          type: string
+          description: カテゴリ
+          example: プログラミング
+         tag:
+          type: string
+          description: タグ
+          example: c
+         created_at:
+          type: string
+          description: 作成した時間
+          example: 2020-05-10/04:45:50
+         updated_at:
+          type: string
+          description: 更新した時間
+          example: 2020-05-10/04:45:50
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: ステータスコード
+        message:
+          type: string
+          description: エラーメッセージ
+      required:
+        - code
+        - message
+  parameters:
+    UserID:
+      name: user_id
+      in: path
+      required: true
+      description: userID
+      schema:
+        type: integer
+  securitySchemes:
+    ApiToken:
+      type: apiKey
+      in: header
+      name: X-API-TOKEN
